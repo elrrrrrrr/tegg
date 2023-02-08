@@ -86,26 +86,6 @@ export class EggAppLoader implements Loader {
     return func;
   }
 
-  private buildCtxLoggerClazz(name: string): EggProtoImplClass {
-    const temp = {
-      [name]: function(ctx) {
-        return ctx.getLogger(name);
-      } as any,
-    };
-    const func = temp[name];
-    PrototypeUtil.setIsEggPrototype(func);
-    PrototypeUtil.setFilePath(func, 'mock_file_path');
-    PrototypeUtil.setProperty(func, {
-      name,
-      initType: ObjectInitType.CONTEXT,
-      accessLevel: AccessLevel.PUBLIC,
-      protoImplType: COMPATIBLE_PROTO_IMPLE_TYPE,
-    });
-    QualifierUtil.addProtoQualifier(func, LoadUnitNameQualifierAttribute, 'app');
-    QualifierUtil.addProtoQualifier(func, InitTypeQualifierAttribute, ObjectInitType.CONTEXT);
-    return func;
-  }
-
   private getLoggerNames(ctxClazzNames: string[]): string[] {
     const loggerNames = Array.from(this.app.loggers.keys());
     // filter logger/coreLogger
@@ -131,13 +111,11 @@ export class EggAppLoader implements Loader {
     const allSingletonClazzs = allSingletonClazzNames.map(name => this.buildAppClazz(name));
     const allContextClazzs = allContextClazzNames.map(name => this.buildCtxClazz(name));
     const appLoggerClazzs = loggerNames.map(name => this.buildAppLoggerClazz(name));
-    const ctxLoggerClazzs = loggerNames.map(name => this.buildCtxLoggerClazz(name));
 
     return [
       ...allSingletonClazzs,
       ...allContextClazzs,
       ...appLoggerClazzs,
-      ...ctxLoggerClazzs,
 
       // inner helper class list
       // TODO: should auto the inner class
